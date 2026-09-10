@@ -1,0 +1,4 @@
+repository "shadows of Eldoria/shadows of Eldoria@13469874955100@cloud"
+  path "/"
+    br "/main"
+    co "/main"
