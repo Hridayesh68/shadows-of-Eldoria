@@ -15,24 +15,15 @@ public class Enemy_Combat : MonoBehaviour
     [Header("Player Detection")]
     public LayerMask playerLayer;
 
-    private void OnCollisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("Player"))
-        {
-            PlayerHealth player = other.gameObject.GetComponent<PlayerHealth>();
-
-            if (player != null)
-            {
-                player.ChangeHealth(-damage);
-
-                Debug.Log("Player took damage!");
-            }
-        }
-    }
-
     public void Attack()
     {
-        // Detect players inside attack range
+        if (attackPoint == null)
+        {
+            Debug.LogWarning("Attack Point is not assigned!");
+            return;
+        }
+
+        // Find players inside attack range
         Collider2D[] hits = Physics2D.OverlapCircleAll(
             attackPoint.position,
             attackRange,
@@ -41,13 +32,26 @@ public class Enemy_Combat : MonoBehaviour
 
         foreach (Collider2D hit in hits)
         {
-            PlayerHealth player = hit.GetComponent<PlayerHealth>();
+            if (!hit.CompareTag("Player"))
+                continue;
 
-            if (player != null)
+            PlayerHealth playerHealth =
+                hit.GetComponent<PlayerHealth>();
+
+            PlayerMovement playerMovement =
+                hit.GetComponent<PlayerMovement>();
+
+            if (playerHealth != null)
             {
-                player.ChangeHealth(-damage);
+                playerHealth.ChangeHealth(-damage);
 
                 Debug.Log("Enemy attacked player!");
+            }
+
+            // Apply knockback
+            if (playerMovement != null)
+            {
+                playerMovement.Knockback(transform);
             }
         }
     }
