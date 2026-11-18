@@ -7,21 +7,14 @@ public class PlayerCombat : MonoBehaviour
     public PlayerMovement playerMovement;
     public Animator anim;
 
-    [Header("Attack Settings")]
-    public int damage = 25;
-    public float attackDuration = 0.45f;
-    public float attackCooldown = 0.1f;
-
     [Header("Attack Point")]
     public Transform attackPoint;
-
-    [Tooltip("Radius of the area that can receive damage.")]
-    public float attackRadius = 1.0f;
 
     [Header("Enemy Detection")]
     public LayerMask enemyLayer;
 
     private Collider2D[] enemiesInRange;
+
     private bool canAttack = true;
 
     private void Awake()
@@ -42,98 +35,128 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    // ==========================================
+    // =========================================================
     // ATTACK
-    // ==========================================
+    // =========================================================
 
     private IEnumerator AttackCoroutine()
     {
+        if (StatManager.Instance == null)
+        {
+            Debug.LogWarning("StatManager not found!");
+            yield break;
+        }
+
         canAttack = false;
 
         playerMovement.SetAttacking(true);
 
         anim.SetBool("IsAttacking", true);
 
-        yield return new WaitForSeconds(attackDuration);
+        // Use attack duration from animation timing.
+        yield return new WaitForSeconds(0.45f);
 
         anim.SetBool("IsAttacking", false);
 
         playerMovement.SetAttacking(false);
 
-        yield return new WaitForSeconds(attackCooldown);
+        // Use cooldown from StatManager
+        yield return new WaitForSeconds(
+            StatManager.Instance.attackCooldown
+        );
 
         canAttack = true;
     }
 
-    // ==========================================
+    // =========================================================
     // DEAL DAMAGE
-    // ==========================================
-    // Call this from the Slash animation event
-    // ==========================================
-public void DealDamage()
-{
-    if (attackPoint == null)
-        return;
+    // =========================================================
+    // Call this using an Animation Event
+    // on the hit frame of the Slash animation.
+    // =========================================================
 
-    enemiesInRange = Physics2D.OverlapCircleAll(
-        attackPoint.position,
-        attackRadius,
-        enemyLayer
-    );
-
-    if (enemiesInRange.Length > 0)
+    public void DealDamage()
     {
-        foreach (Collider2D enemyCollider in enemiesInRange)
+        if (StatManager.Instance == null)
         {
-            EnemyHealth enemyHealth =
-                enemyCollider.GetComponentInParent<EnemyHealth>();
+            Debug.LogWarning("StatManager not found!");
+            return;
+        }
 
-            if (enemyHealth != null)
+        if (attackPoint == null)
+        {
+            Debug.LogWarning("Attack Point is not assigned!");
+            return;
+        }
+
+        int damage = StatManager.Instance.attackDamage;
+        float attackRange = StatManager.Instance.attackRange;
+
+        enemiesInRange = Physics2D.OverlapCircleAll(
+            attackPoint.position,
+            attackRange,
+            enemyLayer
+        );
+
+        if (enemiesInRange.Length > 0)
+        {
+            foreach (Collider2D enemyCollider in enemiesInRange)
             {
-                enemyHealth.TakeDamage(damage);
-            }
+                EnemyHealth enemyHealth =
+                    enemyCollider.GetComponentInParent<EnemyHealth>();
 
-            EnemyKnockback enemyKnockback =
-                enemyCollider.GetComponentInParent<EnemyKnockback>();
+                if (enemyHealth != null)
+                {
+                    // Deal damage
+                    enemyHealth.TakeDamage(damage);
+                }
 
-            if (enemyKnockback != null)
-            {
-                Vector2 direction =
-                    (enemyCollider.transform.position -
-                     attackPoint.position).normalized;
+                // Enemy knockback
+                EnemyKnockback enemyKnockback =
+                    enemyCollider.GetComponentInParent<EnemyKnockback>();
 
-                enemyKnockback.Knockback(direction);
+                if (enemyKnockback != null)
+                {
+                    Vector2 direction =
+                        ((Vector2)enemyCollider.transform.position -
+                         (Vector2)attackPoint.position).normalized;
+
+                    enemyKnockback.Knockback(direction);
+                }
             }
         }
     }
-}
 
-    // ==========================================
-    // RED ATTACK GIZMO
-    // ==========================================
+    // =========================================================
+    // ATTACK GIZMO
+    // =========================================================
 
     private void OnDrawGizmosSelected()
     {
         if (attackPoint == null)
             return;
 
-        // Filled transparent red circle
-        Gizmos.color = new Color(1f, 0f, 0f, 0.25f);
+        float radius = 1f;
+
+        if (StatManager.Instance != null)
+        {
+            radius = StatManager.Instance.attackRange;
+        }
+
+        Gizmos.color = new Color(1f, 0f, 0f, 0.2f);
 
         Gizmos.DrawSphere(
             attackPoint.position,
-            attackRadius
+            radius
         );
 
-        // Red outline
         Gizmos.color = Color.red;
 
         Gizmos.DrawWireSphere(
             attackPoint.position,
-            attackRadius
+            radius
         );
 
-        // Small red center point
         Gizmos.DrawSphere(
             attackPoint.position,
             0.08f

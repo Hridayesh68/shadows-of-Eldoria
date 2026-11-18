@@ -3,9 +3,6 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement")]
-    public float speed = 5f;
-
     [Header("References")]
     public Rigidbody2D rb;
     public Animator anim;
@@ -28,8 +25,6 @@ public class PlayerMovement : MonoBehaviour
     private bool isKnockback;
     private bool isStunned;
 
-    private float stunTimer;
-
     private Vector2 movementInput;
 
     private void Awake()
@@ -47,20 +42,6 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         // ==========================================
-        // STUN TIMER
-        // ==========================================
-
-        if (isStunned)
-        {
-            stunTimer -= Time.deltaTime;
-
-            if (stunTimer <= 0f)
-            {
-                isStunned = false;
-            }
-        }
-
-        // ==========================================
         // DON'T ACCEPT MOVEMENT INPUT
         // ==========================================
 
@@ -68,8 +49,11 @@ public class PlayerMovement : MonoBehaviour
         {
             movementInput = Vector2.zero;
 
-            anim.SetFloat("horizontal", 0f);
-            anim.SetFloat("vertical", 0f);
+            if (anim != null)
+            {
+                anim.SetFloat("horizontal", 0f);
+                anim.SetFloat("vertical", 0f);
+            }
 
             return;
         }
@@ -100,8 +84,11 @@ public class PlayerMovement : MonoBehaviour
         // WALKING ANIMATION
         // ==========================================
 
-        anim.SetFloat("horizontal", Mathf.Abs(horizontal));
-        anim.SetFloat("vertical", Mathf.Abs(vertical));
+        if (anim != null)
+        {
+            anim.SetFloat("horizontal", Mathf.Abs(horizontal));
+            anim.SetFloat("vertical", Mathf.Abs(vertical));
+        }
     }
 
     private void FixedUpdate()
@@ -112,9 +99,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isKnockback)
         {
-            // IMPORTANT:
-            // Do NOT set velocity to zero here.
-            // We want the knockback velocity to continue.
+            // Don't overwrite the knockback velocity.
             return;
         }
 
@@ -129,10 +114,22 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // ==========================================
-        // MOVE
+        // CHECK STAT MANAGER
         // ==========================================
 
-        rb.linearVelocity = movementInput * speed;
+        if (StatManager.Instance == null)
+        {
+            Debug.LogWarning("StatManager not found!");
+            rb.linearVelocity = Vector2.zero;
+            return;
+        }
+
+        // ==========================================
+        // MOVE USING STAT MANAGER
+        // ==========================================
+
+        rb.linearVelocity =
+            movementInput * StatManager.Instance.movementSpeed;
     }
 
     // ==========================================
@@ -192,6 +189,10 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator KnockbackCoroutine(Transform enemy)
     {
+        // ==========================================
+        // ENTER KNOCKBACK
+        // ==========================================
+
         isKnockback = true;
         isStunned = true;
 
@@ -213,7 +214,7 @@ public class PlayerMovement : MonoBehaviour
         rb.linearVelocity = direction * knockbackForce;
 
         // ==========================================
-        // WAIT FOR KNOCKBACK
+        // KNOCKBACK DURATION
         // ==========================================
 
         yield return new WaitForSeconds(knockbackDuration);
@@ -224,12 +225,14 @@ public class PlayerMovement : MonoBehaviour
         isKnockback = false;
 
         // ==========================================
-        // STUN
+        // STUN DURATION
         // ==========================================
 
-        stunTimer = stunDuration;
-
         yield return new WaitForSeconds(stunDuration);
+
+        // ==========================================
+        // RETURN TO NORMAL
+        // ==========================================
 
         isStunned = false;
     }
