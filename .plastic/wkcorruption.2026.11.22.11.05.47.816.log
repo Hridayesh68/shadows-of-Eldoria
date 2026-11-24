@@ -1,0 +1,7 @@
+Process name: /data/GameDev Unity/6000.6.10f1/Editor/Unity
+Process image: /data/GameDev Unity/6000.6.10f1/Editor/Unity
+Process started: 2026.11.22.18.22.55.714
+Error: Reading would overrun buffer
+StackTrace:   at System.IO.FileStream.Read (System.Byte[] array, System.Int32 offset, System.Int32 count) [0x0007a] in <22e1610eb8a64fddad374425202296ea>:0 
+  at Codice.CM.WorkspaceServer.WorkspaceTreeDataStore.ReadWorkspaceContentFromFile (Codice.CM.Common.WorkspaceInfo wkInfo, System.String filePath, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache revisionCache, Codice.Utils.Buffers.FlexibleBufferPool bufferPool) [0x0005e] in <2ce6a48a1dfb43f5ba5630f6bb973aa2>:0 
+  at Codice.CM.WorkspaceServer.WorkspaceTreeDataStore.ReadWorkspaceTreeContent (Codice.CM.Common.WorkspaceInfo wkInfo, System.String wkTreeFile, Codice.CM.WorkspaceServer.IWorkspaceRevisionInfoCache revisionCache, Codice.Utils.Buffers.FlexibleBufferPool bufferPool) [0x00008] in <2ce6a48a1dfb43f5ba5630f6bb973aa2>:0 
