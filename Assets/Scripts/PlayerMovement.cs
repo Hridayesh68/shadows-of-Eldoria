@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
     public Rigidbody2D rb;
     public Animator anim;
     public SpriteRenderer playerSprite;
+    public PlayerCombat playerCombat;
+    public Player_Bow playerBow;
 
     [Header("Facing")]
     public int facingDirection = 1;
@@ -37,10 +39,27 @@ public class PlayerMovement : MonoBehaviour
 
         if (playerSprite == null)
             playerSprite = GetComponentInChildren<SpriteRenderer>();
+
+        if (playerCombat == null)
+            playerCombat = GetComponent<PlayerCombat>();
+
+        if (playerBow == null)
+            playerBow = GetComponent<Player_Bow>();
+    }
+
+    private void Start()
+    {
+        // Start in Knight mode by default
+        SetArcherMode(false);
     }
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            bool enableArcher = playerBow != null && !playerBow.enabled;
+            SetArcherMode(enableArcher);
+        }
         // ==========================================
         // DON'T ACCEPT MOVEMENT INPUT
         // ==========================================
@@ -130,6 +149,15 @@ public class PlayerMovement : MonoBehaviour
 
         rb.linearVelocity =
             movementInput * StatManager.Instance.movementSpeed;
+    }
+
+    public void SetArcherMode(bool isArcher)
+    {
+        if (playerCombat != null)
+            playerCombat.enabled = !isArcher;
+
+        if (playerBow != null)
+            playerBow.enabled = isArcher;
     }
 
     // ==========================================

@@ -7,7 +7,7 @@ public class EnemyKnockback : MonoBehaviour
     public Rigidbody2D rb;
 
     [Header("Knockback")]
-    public float knockbackForce = 8f;
+    public float knockbackForce = 3f;
     public float knockbackDuration = 0.15f;
     public float stunDuration = 0.5f;
 
@@ -32,7 +32,10 @@ public class EnemyKnockback : MonoBehaviour
 
     public void Knockback(Vector2 direction)
     {
-        if (currentState == EnemyState.Knockback)
+        if (!gameObject.activeInHierarchy || rb == null)
+            return;
+
+        if (currentState == EnemyState.Knockback || direction.sqrMagnitude < 0.0001f)
             return;
 
         StartCoroutine(KnockbackCoroutine(direction));
