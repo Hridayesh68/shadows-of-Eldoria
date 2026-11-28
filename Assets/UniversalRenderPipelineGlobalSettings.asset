@@ -71,6 +71,7 @@ MonoBehaviour:
       - rid: 1294701833540337668
       - rid: 1294701833540337669
       - rid: 1294701833540337670
+      - rid: 1294701954332098562
     m_RuntimeSettings:
       m_List: []
   m_AssetVersion: 11
@@ -135,6 +136,10 @@ MonoBehaviour:
         m_Shader: {fileID: 4800000, guid: 7b3e6785f5f6b634794df3a85a2a35da, type: 3}
         m_BlitShader: {fileID: 4800000, guid: 815c625bb9d4fe240a4ccf42ca3899cb, type: 3}
         m_Version: 0
+    - rid: 1294701954332098562
+      type: {class: AlphaUpscaler/RuntimeResources, ns: UnityEngine.Rendering, asm: Unity.RenderPipelines.Core.Runtime}
+      data:
+        m_AlphaUpscaleCS: {fileID: 7200000, guid: f10c23179af641eea368ee165b2e97cf, type: 3}
     - rid: 3114554777721110528
       type: {class: UniversalRenderPipelineEditorAssets, ns: UnityEngine.Rendering.Universal, asm: Unity.RenderPipelines.Universal.Runtime}
       data:
